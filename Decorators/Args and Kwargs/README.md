@@ -1,63 +1,54 @@
 # Args and Kwargs
 
-In Python, [`*args` and `**kwargs`](https://book.pythontips.com/en/latest/args_and_kwargs.html) allow a function to accept and deal with a *variable* number of arguments.
+Python has `*args` and `**kwargs` to accept a *variable* number of positional and keyword arguments. F# has no direct equivalent for functions: every `let` function has a fixed number of curried parameters. When we need a variable number of values, we pass them as data:
 
-- `*args` collects positional arguments into a *tuple*
-- `**kwargs` collects keyword (named) arguments into a *dictionary*
+- a variable number of positional arguments becomes a *list*
+- a variable number of named arguments becomes a *map* (or a list of `(key, value)` tuples)
 
-```py
-def print_arguments(*args, **kwargs):
-    print(f"Positional arguments: {args}")
-    print(f"Keyword arguments: {kwargs}")
+```fsharp
+let printArguments (args: obj list) (kwargs: Map<string, obj>) =
+    printfn "Positional arguments: %A" args
+    printfn "Keyword arguments: %A" kwargs
 
-print_arguments("hello", "world", a=1, b=2)
-# Positional arguments: ('hello', 'world')
-# Keyword arguments: {'a': 1, 'b': 2}
+printArguments [ "hello"; "world" ] (Map [ "a", 1; "b", 2 ])
+// Positional arguments: ["hello"; "world"]
+// Keyword arguments: map [("a", 1); ("b", 2)]
 ```
 
 ## Positional Arguments
 
 Positional arguments are the ones you're already familiar with, where the order of the arguments matters. Like this:
 
-```py
-def sub(a, b):
-    return a - b
+```fsharp
+let sub a b = a - b
 
-# a=3, b=2
-res = sub(3, 2)
-# res = 1
+// a=3, b=2
+let res = sub 3 2
+// res = 1
 ```
 
-## Keyword Arguments
+## Named Arguments
 
-[Keyword arguments](https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments) are passed in by name. *Order does not matter*. Like this:
+F# supports [named arguments](https://learn.microsoft.com/dotnet/fsharp/language-reference/parameters-and-arguments#named-arguments) only on *methods* (members of a type), not on `let` functions. With named arguments, *order does not matter*:
 
-```py
-def sub(a, b):
-    return a - b
+```fsharp
+type Calc =
+    static member Sub(a: int, b: int) = a - b
 
-res = sub(b=3, a=2)
-# res = -1
-res = sub(a=3, b=2)
-# res = 1
+Calc.Sub(b = 3, a = 2) // -1
+Calc.Sub(a = 3, b = 2) // 1
 ```
 
-## A Note on Ordering
-
-Any positional arguments *must come before* keyword arguments. This will *not* work:
-
-```py
-sub(b=3, 2)
-```
+Methods can also take a variable number of arguments with [`[<ParamArray>]`](https://learn.microsoft.com/dotnet/fsharp/language-reference/parameters-and-arguments#parameter-arrays). For plain functions, a list or a map is simpler.
 
 ## Assignment
 
-At Doc2Doc, we need better internal debugging tools. **Complete the `args_logger` function.** It takes a variable number of positional and keyword arguments and prints them to the console.
+At Doc2Doc, we need better internal debugging tools. **Complete the `argsLogger` function.** It takes a list of positional values and a map of named values and prints them to the console.
 
-1. [ ] Print each positional argument *sequentially* using numbers and periods as list markers, starting with `1.` . For example:
+1. [ ] Print each positional argument *sequentially* using numbers and periods as list markers, starting with `1.` . For example:
 
-```py
-args_logger("what's", "up", "doc")
+```fsharp
+argsLogger [ "what's"; "up"; "doc" ] Map.empty
 ```
 
 prints to the console:
@@ -68,11 +59,10 @@ prints to the console:
 3. doc
 ```
 
-2. [ ] Sort the keyword argument *alphabetically by key* with the [`sorted`](https://docs.python.org/3/library/functions.html#sorted) function.
-3. [ ] Then print the sorted keyword arguments using asterisks (`*`) as list markers, and with a colon (`:`) between the key and value. For example:
+2. [ ] Print the named arguments *alphabetically by key*, using asterisks (`*`) as list markers, and with a colon (`:`) between the key and value. For example:
 
-```py
-args_logger("hi", "there", age=17, date="July 4 1776")
+```fsharp
+argsLogger [ "hi"; "there" ] (Map [ "age", box 17; "date", box "July 4 1776" ])
 ```
 
 prints to the console:
@@ -86,6 +76,8 @@ prints to the console:
 
 ## Tips
 
-- Don't feel guilty about using loops.
-- `kwargs` is a dictionary, not a list. My recommendation is to use the [`.items()`](https://docs.python.org/3/library/stdtypes.html#dict.items) method to get the key-value pairs as a list of tuples, then sort that list before printing.
-- When you call `sorted` on a list of tuples, by default it sorts by the first item in each tuple (which is what you want here).
+- [`List.iteri`](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-listmodule.html#iteri) gives you the index of each item.
+- An F# `Map` is always sorted by key, so [`Map.iter`](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-mapmodule.html#iter) already visits the keys alphabetically.
+- Use the `%O` format to print an `obj` value.
+
+Run the examples with `dotnet fsi main.fsx`.
