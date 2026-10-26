@@ -1,8 +1,6 @@
 # Sum Types
 
-Unfortunately, Python does not support sum types as well as some statically typed languages.
-
-Python doesn't enforce your types before your code runs. That's why we need this line here to `raise` an `Exception` if a color is invalid:
+Python does not support sum types as well as statically typed languages. Python doesn't enforce your types before your code runs, so a function like this needs a final line to `raise` an `Exception` if a color is invalid:
 
 ```py
 def color_to_hex(color: Color) -> str:
@@ -17,18 +15,27 @@ def color_to_hex(color: Color) -> str:
     raise Exception("unknown color")
 ```
 
-In a language like Rust, which has an exceptionally rich type system, we could write the same thing like this:
+F# has a rich type system, so we can write the same thing like this:
 
-```rust
-fn color_to_rex(color: Color) -> String {
-    match color {
-        Color::Grenn => "#00FF00".to_string(),
-        Color::Blue => "#0000FF".to_string(),
-        Color::Red => "#FF0000".to_string(),
-    }
-}
+```fsharp
+type Color =
+    | Red
+    | Green
+    | Blue
+
+let colorToHex color =
+    match color with
+    | Green -> "#00FF00"
+    | Blue -> "#0000FF"
+    | Red -> "#FF0000"
 ```
 
-Notice how there isn't any case for an unknown enum variant? That's because the Rust code will fail to compile (a step that happens before the code runs at all) if the types don't line up. The Rust compiler enforces that a `Color` value can only be one of the defined variants, and the `match color` block is required to handle every variant!
+Notice how there isn't any case for an unknown color? A `Color` value can only be one of the defined cases, and the compiler checks that the `match color` handles every case. If you remove the `Red` line, you get a warning before the code ever runs:
 
-This static enforcement is a huge benefit of sum types. It's a shame we can't get that in Python.
+```
+warning FS0025: Incomplete pattern matches on this expression. For example, the value 'Red' may indicate a case not covered by the pattern(s).
+```
+
+You can make it a hard error with `<TreatWarningsAsErrors>` or `--warnaserror:25`.
+
+This static enforcement is a huge benefit of sum types, and F# gives it to us for free.
