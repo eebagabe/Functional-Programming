@@ -4,13 +4,13 @@ In Doc2Doc, users are asking for a filtering feature. They want a command that h
 
 ## Assignment
 
-Complete the `get_filter_cmd` function. It takes two functions as input, `filter_one` and `filter_two`, and returns a function, `filter_cmd`.
+Complete the `getFilterCmd` function. It takes two functions as input, `filterOne` and `filterTwo`, and returns a function, `filterCmd`.
 
-`filter_cmd` should take as input two strings: `content` and `option`.
+`filterCmd` should take as input a string `content` and an optional string `option: string option`.
 
-1. [ ] Set the [default value](https://docs.python.org/3/tutorial/controlflow.html#default-argument-values) of the `option` argument to `--one`.
-2. [ ] Complete `filter_cmd` so that it filters and returns the `content` according to the input `option`.
-    1. [ ] If `--one`, use `filter_one`
-    2. [ ] If `--two`, use `filter_two`
-    3. [ ] If `--three`, use `filter_one` first, then use `filter_two`
-    4. [ ] If another option is passed, raise an exception, `"invalid option"`
+1. [ ] When `option` is `None`, behave as if it were `Some "--one"` (F# functions have no default argument values, so `option` stands in for one).
+2. [ ] Complete `filterCmd` so that it filters and returns the `content` according to the input `option`.
+    1. [ ] If `--one`, use `filterOne`
+    2. [ ] If `--two`, use `filterTwo`
+    3. [ ] If `--three`, use `filterOne` first, then use `filterTwo`
+    4. [ ] If another option is passed, fail with `failwith "invalid option"`
