@@ -2,42 +2,38 @@
 
 Here's some example code for you to reference as you work through the assignment:
 
-```py
-def multiply(x, y):
-    return x * y
+```fsharp
+let multiply x y = x * y
 
-def add(x, y):
-    return x + y
+let add x y = x + y
 
-def self_math(math_func):
-    def inner_func(x):
-        return math_func(x, x)
-    return inner_func
+let selfMath mathFunc =
+    fun x -> mathFunc x x
 
-square_func = self_math(multiply)
-double_func = self_math(add)
+let squareFunc = selfMath multiply
+let doubleFunc = selfMath add
 
-print(square_func(5))
-# prints 25
+printfn "%d" (squareFunc 5)
+// prints 25
 
-print(double_func(5))
-# prints 10
+printfn "%d" (doubleFunc 5)
+// prints 10
 ```
 
 ## Assignment
 
-Complete the `doc_format_checker_and_converter` function.
+Complete the `docFormatCheckerAndConverter` function.
 
-It takes a `conversion_function` and a list of `valid_formats` as parameters. It should return a _new_ function that takes two parameters of its own:
+It takes a `conversionFunction` and a list of `validFormats` as parameters. It should return a _new_ function that takes two parameters of its own:
 
 - `filename`: The name of the file to be converted
 - `content`: The content (body text) of the file to be converted
 
-1. [ ] If the file extension of the `filename` is in the `valid_formats` list, then it should return the result of calling the `conversion_function` on the `content`.
-2. [ ] Otherwise, it should [raise](https://docs.python.org/3/tutorial/errors.html#raising-exceptions) a [ValueError](https://docs.python.org/3/library/exceptions.html#ValueError) with the message `invalid file format`.
+1. [ ] If the file extension of the `filename` is in the `validFormats` list, then it should return the result of calling the `conversionFunction` on the `content`.
+2. [ ] Otherwise, it should fail with [`failwith`](https://learn.microsoft.com/dotnet/fsharp/language-reference/exception-handling/the-failwith-function) and the message `invalid file format`.
 
 ## Tip
 
-You can use the [.split()](https://docs.python.org/3/library/stdtypes.html#str.split) method on the `filename` to get the file extension. Then use the `in` keyword to check if a value is in a list.
+You can use the [`.Split()`](https://learn.microsoft.com/dotnet/api/system.string.split) method on the `filename` to get the file extension. Then use [`List.contains`](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-listmodule.html#contains) to check if a value is in a list.
 
-The `capitalize_content` and `reverse_content` are "conversion functions" that will be passed into our `doc_format_checker_and_converter` function by the tests
+The `capitalizeContent` and `reverseContent` are "conversion functions" that will be passed into our `docFormatCheckerAndConverter` function by the tests.
