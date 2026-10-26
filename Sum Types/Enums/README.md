@@ -1,50 +1,42 @@
 # Enums
 
-So far, we've used classes to model the different cases in a sum type, and union type hints as a simpler way of describing the possible types of a value (albeit with no automatic enforcement at runtime).
+So far, we've used discriminated unions to model the different cases in a sum type, where each case can carry its own data.
 
-If what you're trying to represent is a fixed set of values, you have another good option in Python's type system: enums
+If what you're trying to represent is a fixed set of values, F# has another option: [enums](https://learn.microsoft.com/dotnet/fsharp/language-reference/enumerations)
 
-Let's say we have a `Color` variable that we want to restrict to only three possible values:
+Let's say we have a `Color` that we want to restrict to only three possible values:
 
 - `RED`
 - `GREEN`
 - `BLUE`
 
-We could use a plain old `str` to represent these values, but that's annying because we have to keep track of the "valid" values and defensively check for invalid ones all over our codebase. Instead we can use an `Enum`:
+We could use a plain old `string` to represent these values, but that's annoying because we have to keep track of the "valid" values and defensively check for invalid ones all over our codebase. Instead we can use an enum:
 
-```py
-from enum import Enum
+```fsharp
+type Color =
+    | RED = 1
+    | GREEN = 2
+    | BLUE = 3
 
-Color = Enum("Color", ["RED", "GREEN", "BLUE"])
-print(Color.RED) # This works, prints 'Color.RED'
-print(Color.TEAL) # This raises an exception
+printfn "%A" Color.RED // This works, prints 'RED'
+printfn "%A" Color.TEAL // This doesn't even compile
 ```
 
-There is also a manual class-based syntax:
+The syntax looks like a discriminated union, but every case has an integer value (`= 1`). That's what makes it an enum.
 
-```py
-from enum import Enum
+Now `Color` is a sum type! There are a few benefits:
 
-class Color(Enum):
-    RED = 1
-    GREEN = 2
-    BLUE = 3
-
-print(Color.RED) # This works, prints 'Color.RED'
-print(Color.TEAL) # this raises an exception
-```
-
-The class-based syntax is more verbose, but safer because it prevents ambiguity between the variable name and the enum name. With `Color = Enum("Color", ...)`, the string `"Color"` set the enum class name, while `Color =` assigns that class to a variable. While those names normally shouldn't be different, they can be.
-
-Now `Color` is a sum type! At least, as close as we can get in Python. There are a few benefits:
-
-1. A `Color` can only be `RED`, `GREEN`, or `BLUE`. If you try to use `Color.TEAL`, Python raises an exception.
+1. A `Color` can only be `RED`, `GREEN`, or `BLUE`. If you try to use `Color.TEAL`, the compiler refuses to build the code.
 2. There is a central place to see the "valid" values for a `Color`.
-3. Each `COLOR` has a "name" (e.g. `RED`) and an integer value (e.g. `1`). The value can be useful if you need to store, compare, or serialize the enum in a specific way.
+3. Each `Color` has a "name" (e.g. `RED`) and an integer value (e.g. `1`). The value can be useful if you need to store, compare, or serialize the enum in a specific way.
+
+### Enums vs. discriminated unions
+
+Enums are .NET integers underneath, so a value outside the list can still sneak in through a cast (`enum<Color> 42`). That's why a `match` on an enum still needs a `_` case. Discriminated unions don't have that hole, and their cases can carry data. Prefer unions in F# code; use enums when you need the integer values (interop, storage, flags).
 
 ## Assignment
 
-Create an `Enum` called `Doctype` with values:
+Create an enum called `Doctype` with values:
 
 - `PDF`
 - `TXT`
@@ -52,4 +44,4 @@ Create an `Enum` called `Doctype` with values:
 - `MD`
 - `HTML`
 
-> Tip: Don't forget to import Enum class from the enum module!
+> Tip: Don't forget to give each case an integer value, or you'll get a union instead of an enum!
