@@ -1,79 +1,62 @@
 # Match
 
-Let's take another look at our example `Enum` from the previous lessons:
+Let's take another look at a sum type like the ones from the previous lessons:
 
-```py
-from enum import Enum
-
-class Color(Enum):
-    RED = 1
-    GREEN = 2
-    BLUE = 3
+```fsharp
+type Color =
+    | Red
+    | Green
+    | Blue
 ```
 
-## Working With Enums
+## Working With Unions
 
-Python has a match statement that tends to be a lot cleaner than a series of `if`/`elif`/`else` statements when we're working with a fixed set of possible values (like a sum type, or more specifically an enum):
+F# has a [`match` expression](https://learn.microsoft.com/dotnet/fsharp/language-reference/match-expressions) that tends to be a lot cleaner than a series of `if`/`elif`/`else` expressions when we're working with a fixed set of possible values (like a sum type):
 
-```py
-def get_hex(color: Color) -> str:
-    match color:
-        case Color.RED:
-            return "#FF0000"
-        case Color.GREEN:
-            return "#00FF00"
-        case Color.BLUE:
-            return "#0000FF"
-
-        # default case (invalid color)
-        case _:
-            return "#FFFFFF"
+```fsharp
+let getHex color =
+    match color with
+    | Red -> "#FF0000"
+    | Green -> "#00FF00"
+    | Blue -> "#0000FF"
 ```
 
-If you have two values to match, you can use a `tuple`:
+There is no default case: the compiler knows every possible `Color` and warns you if one is missing.
 
-```py
-class Shade(Enum):
-    LIGHT = 1
-    DARK = 2
+If you have two values to match, you can use a tuple:
 
-def get_hex(color: Color, shade: Shade) -> str:
-    match (color, shade):
-        case (Color.RED, Shade.LIGHT):
-            return "#FFAAAA"
-        case (Color.RED, Shade.DARK):
-            return "#AA0000"
-        case (Color.GREEN, Shade.LIGHT):
-            return "#AAFFAA"
-        case (Color.GREEN, Shade.DARK):
-            return "#00AA00"
-        case (Color.BLUE, Shade.LIGHT):
-            return "#AAAAFF"
-        case (Color.BLUE, Shade.DARK):
-            return "#0000AA"
+```fsharp
+type Shade =
+    | Light
+    | Dark
 
-        # default case (invalid combination)
-        case _:
-            return "#FFFFFF"
+let getHex color shade =
+    match color, shade with
+    | Red, Light -> "#FFAAAA"
+    | Red, Dark -> "#AA0000"
+    | Green, Light -> "#AAFFAA"
+    | Green, Dark -> "#00AA00"
+    | Blue, Light -> "#AAAAFF"
+    | Blue, Dark -> "#0000AA"
 ```
 
-The values after `match` (`color` and `shade`) are compared against enum members in each `case` (`Color.RED` and `Shade.LIGHT`). If a match is found, the code in the block is executed.
+The values after `match` (`color` and `shade`) are compared against the patterns in each case (`Red, Light`). The first pattern that matches wins and its expression is the result. When you only handle some combinations, finish with the wildcard `_`, which matches anything.
 
 ## Assignment
 
-Complete the `convert_format` function. Using the enum `DocFormat`, it should support 3 types of conversions:
+Complete the `convertFormat` function. Using the union `DocFormat`, it should support 3 types of conversions. The target format is a `DocFormat option`, because it may be missing:
 
-1. [ ] From `MD` to `HTML`:
-   - Assume the content is a single `h1` tag in Markdown syntax - one string representing one line. Replace the elading `# ` with an `<h1>` and add a `</h1>` to the end.
+1. [ ] From `MD` to `Some HTML`:
+   - Assume the content is a single `h1` tag in Markdown syntax - one string representing one line. Replace the leading `# ` with an `<h1>` and add a `</h1>` to the end.
    - Example: `# This is a heading` -> `<h1>This is a heading</h1>`
-2. [ ] From `TXT` to `PDF`:
+2. [ ] From `TXT` to `Some PDF`:
    - Simply add a `[PDF]` tag to the beginning and end of the content;
    - Notice the spaces between `[PDF]` tags and the content: `This is some text` -> `[PDF] This is some text [PDF]`
-3. [ ] From `HTML` to `MD`:
-   - Replace any `<h1>` tags with `# ` and remove any `</h1> tags.`
+3. [ ] From `HTML` to `Some MD`:
+   - Replace any `<h1>` tags with `# ` and remove any `</h1>` tags.
    - Example `<h1>This is a heading</h1>` -> `# This is a heading`
-4. [ ] Any other conversion:
-   - If the input format is invalid, raise an Exception:
+4. [ ] Any other conversion (including `None`):
+   - Fail with `failwith`:
    ```cmd
    invalid type
    ```
