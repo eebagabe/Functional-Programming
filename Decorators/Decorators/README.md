@@ -2,71 +2,64 @@
 
 - Dificulty: 8
 
-The `*args` and `**kwargs` syntax is great for decorators that are intended to work on functions with different signatures.
+In Python, `*args` and `**kwargs` let one decorator work on functions with different signatures. In F#, a function's type includes its parameters, so a wrapper must know the shape of the function it wraps. A common trick is to give every decorated function the same shape, for example a single list of arguments.
 
 ## Example
 
-The `log_call_count` function below doesn't care about the number or the types of the decorated function's (`func_to_decorate`) arguements. It just wants to count how many times the function is called. However, it still needs to pass any arguments thorugh to the wrapped function.
+The `logCallCount` function below doesn't care about what the decorated function does. It just wants to count how many times the function is called. However, it still needs to pass the argument through to the wrapped function.
 
-```py
-from collections.abc import Callable
+```fsharp
+let logCallCount (funcToDecorate: 'a -> 'b) =
+    let count = ref 0
 
-def log_call_count(func_to_decorate: Callable[..., object]) -> Callable[..., object]:
-    count: int = 0
+    fun (arg: 'a) ->
+        count.Value <- count.Value + 1
+        printfn "Called %d times" count.Value
 
-    def wrapper(*args: object, **kwargs: object) -> object:
-        nonlocal count
-        count += 1
-
-        print(f"Called {count} times")
-
-        # Pass any and all arguments to the decorated function
-        return func_to_decorate(*args, **kwargs)
-
-    return wrapper
+        // Pass the argument to the decorated function
+        funcToDecorate arg
 ```
 
-- `Callable[..., object]` is the most general type hint for a function. It means "any function that takes any arguments and returns anything."
+- `'a -> 'b` is a [generic](https://learn.microsoft.com/dotnet/fsharp/language-reference/generics/) function type. It means "any function that takes one value and returns anything." A tuple or a list counts as one value.
 
 ### Assignment
 
-Complete the `markdown_to_text_decorator` function. It can decorate a function with any number of string arguments, no matter if they're positional or keyword args. It will run the decorated function, but first strip out any Markdown heading symbols (see below for an explanation of Markdown headings).
+Complete the `markdownToTextDecorator` function. It decorates a function that takes a `string list`. It will run the decorated function, but first strip out any Markdown heading symbols (see below for an explanation of Markdown headings).
 
 For example, if the decorated function is called like this:
 
-```py
-format_as_essay(title="# My Title", body="Hello", conclusion="## Done")
+```fsharp
+formatAsEssay [ "# My Title"; "Hello"; "## Done" ]
 ```
 
-The wrapper should convert the keyword argument values, then call the original function like this:
+The wrapper should convert every value, then call the original function like this:
 
-```py
-format_as_essay(title="My Title", body="Hello", conclusion="Done")
+```fsharp
+formatAsEssay [ "My Title"; "Hello"; "Done" ]
 ```
 
-The same idea applies to positional arguments:
+The same idea applies to any number of arguments:
 
-```py
-concat("# First", "## Second")
+```fsharp
+concat [ "# First"; "## Second" ]
 ```
 
 should become:
 
-```py
-concat("First", "Second")
+```fsharp
+concat [ "First"; "Second" ]
 ```
 
-`markdown_to_text_decorator` should return a wrapper function that takes `*args` and `**kwargs`. The wrapper should:
+`markdownToTextDecorator` should return a wrapper function that takes a `string list`. The wrapper should:
 
-1. [ ] Convert every positional argument in `args` with `convert_md_to_txt`.
-2. [ ] Convert every value in `kwargs` with `convert_md_to_txt`, while keeping each key unchanged.
-3. [ ] Call the decorated function with the converted positional keyword arguments.
-4. [ ] Return the decorated function's result.
+1. [ ] Convert every argument with `convertMdToTxt`.
+2. [ ] Call the decorated function with the converted arguments.
+3. [ ] Return the decorated function's result.
 
 ### Tips
 
-- Take a look at `formatters.py` to see what the formatter functions do. What arguments are they expecting? You can use `*` tuple unpacking and `**` dictionary unpacking operators to pass variables as the correct arguments.
-- One way to convert each Markdown string to play text is with `map`. For `kwargs`, use the `.items()` dictionary method to work with key-value pairs.
-- The provided `convert_md_to_txt` function takes a string of Markdown text and returns the text with any "heading" symbols removed. For example:
+- Take a look at `formatters.fsx` to see what the formatter functions do. They pattern match on the list to get each argument by position.
+- One way to convert each Markdown string to plain text is with [`List.map`](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-listmodule.html#map).
+- The provided `convertMdToTxt` function takes a string of Markdown text and returns the text with any "heading" symbols removed. For example:
 
 - Input: # This is a heading | Output: This is a heading
