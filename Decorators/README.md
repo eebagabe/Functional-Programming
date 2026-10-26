@@ -1,73 +1,71 @@
 # Decorators
 
-Remember function transformations where a (higher-order) function takes a function and returns a function with new behavior? [Python decorators](https://docs.python.org/3/glossary.html#term-decorator) are just [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugar) around that. "Syntactic sugar" just means "a more convenient syntax".
+Remember function transformations where a (higher-order) function takes a function and returns a function with new behavior? Python has [decorators](https://docs.python.org/3/glossary.html#term-decorator), a special `@` syntax for that. F# has no special syntax: a decorator is just a higher-order function that you apply yourself.
 
 **Example:**
 
-```py
-def vowel_counter(func_to_decorate):
-    vowel_count = 0
-    def wrapper(doc):
-        nonlocal vowel_count
-        vowels = "aeiou"
-        for char in doc:
-            if char.lower() in vowels:
-                vowel_count += 1
-        print(f"Vowel count: {vowel_count}")
-        return func_to_decorate(doc)
-    return wrapper
+```fsharp
+let vowelCounter (funcToDecorate: string -> unit) =
+    let vowelCount = ref 0
 
-@vowel_counter
-def process_doc(doc):
-    print(f"Document: {doc}")
+    fun (doc: string) ->
+        let vowels = doc.ToLower() |> Seq.filter (fun c -> "aeiou".Contains c) |> Seq.length
+        vowelCount.Value <- vowelCount.Value + vowels
+        printfn "Vowel count: %d" vowelCount.Value
+        funcToDecorate doc
 
-process_doc("What")
-# Vowel count: 1
-# Document: What
+let processDoc = vowelCounter (fun doc -> printfn "Document: %s" doc)
 
-process_doc("A wonderful")
-# Vowel count: 5
-# Document: A wonderful
+processDoc "What"
+// Vowel count: 1
+// Document: What
 
-process_doc("world")
-# Vowel count: 6
-# Document: world
+processDoc "A wonderful"
+// Vowel count: 5
+// Document: A wonderful
+
+processDoc "world"
+// Vowel count: 6
+// Document: world
 ```
 
-The `@vowel_counter` line is "decorating" the `process_doc` function with the `vowel_counter` function. `vowel_counter` is called once when `process_doc` is defined with the `@` syntax, but the `wrapper` function that it returns is called every time `process_doc` is called. That's why `vowel_count` is preserved and printed after each time.
+`processDoc` is "decorated" with the `vowelCounter` function. `vowelCounter` is called once, when `processDoc` is defined, but the function that it returns is called every time `processDoc` is called. That's why `vowelCount` is preserved and printed after each time.
 
-## It's Just Syntactic Sugar
+## It's Just a Function Call
 
-Python decorators are just another (sometimes simpler) way of writing a higher-order function. These two pieces of code are *identical*:
+In Python, these two pieces of code are *identical*:
 
-### With Decorator
+### With Decorator (Python)
 
 ```py
 @vowel_counter
 def process_doc(doc):
     print(f"Document: {doc}")
-
-process_doc("Something wicked this way comes")
 ```
 
-### Without Decorator
+### Without Decorator (Python)
 
 ```py
 def process_doc(doc):
     print(f"Document: {doc}")
 
 process_doc = vowel_counter(process_doc)
-process_doc("Something wicked this way comes")
+```
+
+F# only has the second form. You can write it with a pipe too:
+
+```fsharp
+let processDoc = (fun doc -> printfn "Document: %s" doc) |> vowelCounter
 ```
 
 ## Assignment
 
-The provided `file_type_aggregator` function is intended to decorate other functions. It assumes that the function it decorates has exactly 2 positional arguments.
+The provided `fileTypeAggregator` function is intended to decorate other functions. It assumes that the function it decorates takes exactly 2 curried string arguments.
 
-**Create a `process_doc` function** that's decorated by `file_type_aggregator`. It should return the following string:
+**Create a `processDoc` function** that's decorated by `fileTypeAggregator`. It should return the following string:
 
-```py
-f"Processing doc: '{doc}'. File Type: {file_type}"
+```fsharp
+$"Processing doc: '{doc}'. File Type: {fileType}"
 ```
 
-Where `doc` and `file_type` are its positional arguments. (See line 11 for where it's being called)
+Where `doc` and `fileType` are its arguments.
