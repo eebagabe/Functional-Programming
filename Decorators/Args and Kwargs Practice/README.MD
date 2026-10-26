@@ -4,20 +4,18 @@ Doc2Doc should be extensible to allow for third-party plugins. These plugins wil
 
 ## Assignment
 
-Complete the `configure_plugin_decorator` function. It decorates a `func` that takes keyword arguments `**kwargs`, but the wrapper function it returns takes positional arguments `*args`. The arguments passed to the wrapper will be a series of tuples, each a key/value pair.
+Complete the `configurePluginDecorator` function. It decorates a `func` that takes its named settings as a `Map<string, string>`, but the wrapper function it returns takes a list of key/value tuples, `(string * string) list`.
 
-1. [ ] Create a wrapper function that takes positional arguments `*args`:
-   1. [ ] Within the wrapper function, convert the `args` into a dictionary with the [`dict`](https://docs.python.org/3/library/stdtypes.html#dict) function.
-   2. [ ] Return the result of passing this dictionary into `func` as keyword arguments using the `**` operator to [unpack the dict](https://www.bitecode.dev/i/140708565/unpacking-arguments).
-2. [ ] Return the wrapper function.
+1. [ ] Return a wrapper function that takes `args: (string * string) list`:
+   1. [ ] Within the wrapper function, convert the `args` into a map with [`Map`](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-fsharpmap-2.html) (or `Map.ofList`).
+   2. [ ] Return the result of passing this map into `func`.
 
-```python
-plugin_config = configure_backups(("path", "~/duplicates"), ("prefix", "duplicate_"), ("extension", ".rtf"))
+Each plugin (see `plugins.fsx`) reads the keys it knows with `Map.tryFind` and falls back to its own defaults.
 
-# plugin_config:
-# {
-#   "path": "~/duplicates",
-#   "prefix": "duplicate_",
-#   "extension": ".rtf",
-# }
+```fsharp
+let pluginConfig =
+    configureBackups [ "path", "~/duplicates"; "prefix", "duplicate_"; "extension", ".rtf" ]
+
+// pluginConfig:
+// map [ ("extension", ".rtf"); ("path", "~/duplicates"); ("prefix", "duplicate_") ]
 ```
